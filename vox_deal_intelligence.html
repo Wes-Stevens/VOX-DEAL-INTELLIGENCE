@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VOX Deal Intelligence Platform</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0c0c0c;--bg2:#111;--bg3:#171717;--bg4:#1e1e1e;
+  --border:#252525;--border2:#2e2e2e;
+  --gold:#8B7355;--gold-l:#C4A882;
+  --text:#e5ddd0;--text2:#a09080;--text3:#5a5248;
+  --red:#e05555;--red-bg:#1a0808;--red-t:#ffaaaa;
+  --amber:#d4922a;--amber-bg:#1a1000;--amber-t:#ffd899;
+  --green:#4aaa6a;--green-bg:#071510;--green-t:#88ddaa;
+  --blue:#5588cc;--blue-bg:#08121e;--blue-t:#99bbff;
+}
+*{box-sizing:border-box}
+body{font-family:"Palatino Linotype",Palatino,Georgia,serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:#333;border-radius:3px}
+
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 20px;display:flex;align-items:stretch;height:52px;flex-shrink:0;gap:0}
+.logo{display:flex;align-items:center;gap:10px;padding-right:20px;border-right:1px solid var(--border)}
+.logo-mark{width:28px;height:28px;border-radius:5px;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.logo-name{font-size:13px;font-weight:700}
+.logo-sub{font-size:8px;color:var(--text3);letter-spacing:2px;text-transform:uppercase;font-family:Arial,sans-serif}
+.nav{display:flex;align-items:stretch;padding-left:4px;flex:1}
+.nav-btn{padding:0 18px;border:none;background:transparent;border-bottom:2px solid transparent;color:var(--text3);cursor:pointer;font-size:11px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+.nav-btn.active{border-bottom-color:var(--gold);color:var(--gold-l)}
+.nav-btn:hover:not(.active){color:var(--text2)}
+.header-right{display:flex;align-items:center;gap:10px;padding-left:16px;border-left:1px solid var(--border)}
+.sync-status{display:flex;align-items:center;gap:5px;font-family:Arial,sans-serif;font-size:10px;color:var(--text3)}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#444;flex-shrink:0;transition:background .3s}
+.sync-dot.connected{background:var(--green)}
+.sync-dot.syncing{background:var(--amber);animation:blink .8s ease-in-out infinite}
+.sync-dot.error{background:var(--red)}
+@keyframes blink{0%,100%{opacity:.4}50%{opacity:1}}
+.settings-btn{padding:5px 10px;border-radius:4px;cursor:pointer;font-family:Arial,sans-serif;font-size:11px;font-weight:700;border:1px solid var(--border2);background:var(--bg3);color:var(--text3);transition:all .15s}
+.settings-btn:hover{border-color:var(--gold);color:var(--gold-l)}
+
+.body{flex:1;padding:20px;max-width:1060px;margin:0 auto;width:100%}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px;margin-bottom:14px}
+.card-title{font-size:9px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:12px;font-family:Arial,sans-serif}
+.label{font-size:9px;color:var(--text3);font-family:Arial,sans-serif;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;display:block}
+.input{background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text);padding:7px 10px;font-size:13px;font-family:Georgia,serif;width:100%;outline:none}
+.input:focus{border-color:var(--gold)}
+.input::placeholder{color:var(--text3)}
+.textarea{background:var(--bg);border:1px solid var(--border2);border-radius:4px;color:var(--text);padding:9px 11px;font-size:12px;font-family:Georgia,serif;width:100%;outline:none;min-height:160px;resize:vertical}
+.textarea:focus{border-color:var(--gold)}
+.textarea::placeholder{color:var(--text3)}
+.btn{padding:8px 18px;border-radius:4px;cursor:pointer;font-family:Arial,sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);transition:all .15s}
+.btn:hover{border-color:var(--gold);color:var(--text)}
+.btn:disabled{opacity:.35;cursor:default}
+.btn-primary{background:var(--gold);border-color:var(--gold);color:#fff}
+.btn-primary:hover{background:var(--gold-l);border-color:var(--gold-l);color:#fff}
+.btn-danger{background:var(--red-bg);border-color:var(--red)44;color:var(--red)}
+.btn-sm{padding:5px 11px;font-size:10px}
+.btn-ghost{background:transparent;border-color:var(--border2);color:var(--text3)}
+.badge{display:inline-flex;align-items:center;font-size:9px;font-weight:800;letter-spacing:1.5px;padding:2px 8px;border-radius:10px;font-family:Arial,sans-serif;text-transform:uppercase;white-space:nowrap}
+.badge-red{background:var(--red-bg);color:var(--red-t);border:1px solid var(--red)44}
+.badge-amber{background:var(--amber-bg);color:var(--amber-t);border:1px solid var(--amber)44}
+.badge-green{background:var(--green-bg);color:var(--green-t);border:1px solid var(--green)44}
+.badge-blue{background:var(--blue-bg);color:var(--blue-t);border:1px solid var(--blue)44}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.flex{display:flex}.flex-col{flex-direction:column}.items-center{align-items:center}.justify-between{justify-content:space-between}.flex-1{flex:1}.flex-wrap{flex-wrap:wrap}
+.gap-8{gap:8px}.gap-10{gap:10px}.gap-12{gap:12px}.gap-16{gap:16px}
+.mb-4{margin-bottom:4px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}.mb-20{margin-bottom:20px}
+.mt-4{margin-top:4px}.mt-8{margin-top:8px}.mt-12{margin-top:12px}
+.drop-zone{border:2px dashed var(--gold)44;border-radius:7px;padding:22px 18px;text-align:center;cursor:pointer;transition:all .2s;background:var(--bg3)}
+.drop-zone:hover,.drop-zone.drag{border-color:var(--gold-l);background:var(--bg4)}
+.drop-zone .dz-icon{font-size:22px;margin-bottom:6px}
+.drop-zone .dz-main{font-size:12px;font-family:Arial,sans-serif;color:var(--text2);font-weight:700}
+.drop-zone .dz-sub{font-size:10px;font-family:Arial,sans-serif;color:var(--text3);margin-top:3px}
+.spinner{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px;gap:16px}
+.dots{display:flex;gap:5px;margin-top:8px}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gold);animation:pulse 1.2s ease-in-out infinite}
+.dot:nth-child(2){animation-delay:.2s}.dot:nth-child(3){animation-delay:.4s}
+@keyframes pulse{0%,100%{opacity:.2;transform:scale(.7)}50%{opacity:1;transform:scale(1.2)}}
+.divider{height:1px;background:var(--border);margin:14px 0}
+.or-divider{text-align:center;font-size:9px;color:var(--text3);font-family:Arial,sans-serif;letter-spacing:2px;text-transform:uppercase;margin:10px 0}
+.stat-label{font-size:8px;color:var(--text3);font-family:Arial,sans-serif;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.stat-val{font-size:13px;font-weight:700;color:var(--gold-l)}
+.stat-box{padding:7px 9px;background:var(--bg3);border-radius:4px}
+.score-circle{width:68px;height:68px;border-radius:50%;border:3px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.score-num{font-size:21px;font-weight:800}
+.score-denom{font-size:8px;font-weight:700;letter-spacing:1px;font-family:Arial,sans-serif}
+.issue-item{border:1px solid;border-radius:5px;margin-bottom:7px;overflow:hidden}
+.issue-header{padding:10px 13px;cursor:pointer;display:flex;align-items:center;gap:9px}
+.issue-body{padding:13px 15px}
+.issue-excerpt{padding:7px 11px;background:var(--bg4);border-left:3px solid var(--border2);border-radius:0 4px 4px 0;margin-bottom:9px;font-size:11px;color:var(--text2);font-style:italic}
+.fix-box{padding:9px 11px;border:1px solid;border-radius:4px}
+.fix-label{font-size:8px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;font-family:Arial,sans-serif;margin-bottom:3px}
+.section-item{border:1px solid;border-radius:5px;overflow:hidden}
+.section-header{padding:9px 13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between}
+.section-body{padding:11px 13px}
+.prec-card{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:16px;transition:border-color .15s}
+.prec-card:hover{border-color:var(--gold)44}
+.prec-check-item{display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:4px;cursor:pointer;transition:all .15s;border:1px solid var(--border)}
+.prec-check-item:hover{border-color:var(--gold)44;background:var(--bg4)}
+.prec-check-item.checked{background:var(--gold)12;border-color:var(--gold)55}
+.check-box{width:15px;height:15px;border-radius:2px;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:10px;transition:all .15s}
+.prec-check-item.checked .check-box{background:var(--gold);border-color:var(--gold);color:#fff}
+.priority-num{width:26px;height:26px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:800;font-size:12px;color:#fff;font-family:Arial,sans-serif}
+.error-box{padding:9px 13px;background:var(--red-bg);border:1px solid var(--red)33;border-radius:4px;color:var(--red-t);font-size:12px;font-family:Arial,sans-serif;margin-bottom:10px}
+.success-box{padding:9px 13px;background:var(--green-bg);border:1px solid var(--green)33;border-radius:4px;color:var(--green-t);font-size:12px;font-family:Arial,sans-serif;margin-bottom:10px}
+.callout{padding:10px 14px;border-left:3px solid var(--gold);border-radius:0 5px 5px 0;background:var(--bg3);font-size:12px;color:var(--text2);font-style:italic;line-height:1.6}
+.empty{text-align:center;padding:50px 20px}
+.empty .icon{font-size:36px;margin-bottom:14px}
+.empty .title{font-size:15px;font-weight:700;margin-bottom:6px}
+.empty .sub{font-size:12px;color:var(--text3);font-family:Arial,sans-serif}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:1000;overflow-y:auto;padding:20px;display:flex;align-items:flex-start;justify-content:center}
+.modal{width:100%;max-width:720px;background:var(--bg2);border-radius:9px;border:1px solid var(--border);padding:24px;margin-top:20px}
+.settings-modal{max-width:560px}
+.hidden{display:none}
+.text-gold{color:var(--gold-l)}.text-red{color:var(--red-t)}.text-green{color:var(--green-t)}.text-amber{color:var(--amber-t)}.text-muted{color:var(--text3)}
+.font-sans{font-family:Arial,sans-serif}.font-bold{font-weight:700}.text-sm{font-size:12px}.text-xs{font-size:10px}.text-xxs{font-size:9px}
+.italic{font-style:italic}.lh-16{line-height:1.6}.lh-17{line-height:1.7}
+.w-full{width:100%}
+.section-label{font-size:9px;letter-spacing:3px;color:var(--gold);font-weight:700;text-transform:uppercase;margin-bottom:2px;font-family:Arial,sans-serif}
+.page-title{font-size:19px;font-weight:700;margin-bottom:18px}
+.border-left-gold{border-left:3px solid var(--gold)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .2s ease}
+.setup-step{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.setup-num{width:22px;height:22px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;font-family:Arial,sans-serif;flex-shrink:0;margin-top:1px}
+.setup-text{font-size:12px;color:var(--text2);font-family:Arial,sans-serif;line-height:1.5;flex:1}
+.setup-text strong{color:var(--text)}
+.setup-text code{background:var(--bg4);padding:1px 5px;border-radius:3px;font-family:monospace;font-size:11px;color:var(--gold-l)}
+.mode-badge{display:inline-flex;align-items:center;gap:5px;font-size:9px;font-family:Arial,sans-serif;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:10px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">
+    <div class="logo-mark">⚖️</div>
+    <div>
+      <div class="logo-name">VOX Intelligence</div>
+      <div class="logo-sub">Animation Deal Platform</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="switchTab('library')" id="tab-library">Library (<span id="lib-count">0</span>)</button>
+    <button class="nav-btn" onclick="switchTab('summarizer')" id="tab-summarizer">Summarizer</button>
+    <button class="nav-btn" onclick="switchTab('analyzer')" id="tab-analyzer">Analyzer</button>
+  </nav>
+  <div class="header-right">
+    <div class="sync-status">
+      <div class="sync-dot" id="sync-dot"></div>
+      <span id="sync-label">Not configured</span>
+    </div>
+    <button class="settings-btn" onclick="openSettings()">⚙ Settings</button>
+  </div>
+</div>
+
+<div class="body">
+  <div id="tab-library-content" class="fade-in"></div>
+  <div id="tab-summarizer-content" class="hidden fade-in"></div>
+  <div id="tab-analyzer-content" class="hidden fade-in"></div>
+</div>
+
+<!-- MODAL (settings + precedent detail) -->
+<div id="modal" class="modal-overlay hidden" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let currentTab = 'library';
+let precedents = [];
+let sumState = {step:'input',fileData:null,fileName:'',paste:'',dealName:'',talentName:'',studio:'',date:'',context:'',result:null,notes:''};
+let anaState = {step:'input',fileData:null,fileName:'',paste:'',dealName:'',talentName:'',context:'',selectedPrecs:[],result:null,openIssue:-1,openCat:-1};
+
+// ─── CONFIG ───────────────────────────────────────────────────────────────────
+function getCfg(k,def=''){ return localStorage.getItem('vox_cfg_'+k)||def; }
+function setCfg(k,v){ localStorage.setItem('vox_cfg_'+k,v); }
+function getAnthropicKey(){ return getCfg('anthropic_key'); }
+function getAirtableToken(){ return getCfg('airtable_token'); }
+function getAirtableBaseId(){ return getCfg('airtable_base_id'); }
+function getAirtableTable(){ return getCfg('airtable_table','Precedents'); }
+function isAirtableConfigured(){ return !!(getAirtableToken() && getAirtableBaseId()); }
+
+// ─── SYNC STATUS ──────────────────────────────────────────────────────────────
+function setSyncStatus(state, label){
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot'+(state?' '+state:'');
+  lbl.textContent = label;
+}
+
+// ─── AIRTABLE API ─────────────────────────────────────────────────────────────
+const AT_BASE = 'https://api.airtable.com/v0';
+function atHeaders(){ return {'Authorization':'Bearer '+getAirtableToken(),'Content-Type':'application/json'}; }
+function atUrl(path=''){ return `${AT_BASE}/${getAirtableBaseId()}/${encodeURIComponent(getAirtableTable())}${path}`; }
+
+async function atLoadAll(){
+  let records=[], offset=null;
+  do {
+    const url = atUrl()+'?pageSize=100'+(offset?'&offset='+offset:'');
+    const res = await fetch(url,{headers:atHeaders()});
+    if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'Airtable error '+res.status); }
+    const data = await res.json();
+    records = records.concat(data.records);
+    offset = data.offset;
+  } while(offset);
+  return records;
+}
+
+async function atCreate(fields){
+  const res = await fetch(atUrl(),{method:'POST',headers:atHeaders(),body:JSON.stringify({fields})});
+  if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'Create failed'); }
+  return await res.json();
+}
+
+async function atDelete(recordId){
+  const res = await fetch(atUrl('/'+recordId),{method:'DELETE',headers:atHeaders()});
+  if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'Delete failed'); }
+}
+
+// ─── STORAGE LAYER ────────────────────────────────────────────────────────────
+async function loadPrecedents(){
+  if(isAirtableConfigured()){
+    setSyncStatus('syncing','Syncing...');
+    try{
+      const records = await atLoadAll();
+      precedents = records.map(r=>{
+        try{ return {...JSON.parse(r.fields.data||'{}'),_atId:r.id}; } catch{ return null; }
+      }).filter(Boolean);
+      setSyncStatus('connected','Airtable · '+precedents.length+' deal'+(precedents.length!==1?'s':''));
+    } catch(err){
+      setSyncStatus('error','Sync error');
+      console.error(err);
+      // Fall back to localStorage
+      loadFromLocalStorage();
+    }
+  } else {
+    loadFromLocalStorage();
+    setSyncStatus('','Local only');
+  }
+  updateLibCount();
+}
+
+function loadFromLocalStorage(){
+  try{
+    const idx = JSON.parse(localStorage.getItem('vox_prec_index')||'[]');
+    precedents = idx.map(item=>{ try{ return JSON.parse(localStorage.getItem('vox_prec_'+item.id)||'null'); }catch{return null;} }).filter(Boolean);
+  } catch{ precedents=[]; }
+}
+
+async function savePrecedent(data){
+  const id = data.id;
+  if(isAirtableConfigured()){
+    setSyncStatus('syncing','Saving...');
+    const record = await atCreate({
+      deal_id: id,
+      deal_name: data.deal_name||'',
+      talent_name: data.talent_name||'',
+      studio: data.studio||'',
+      deal_date: data.deal_date||'',
+      overall_posture: data.overall_posture||'',
+      data: JSON.stringify(data)
+    });
+    data._atId = record.id;
+    setSyncStatus('connected','Airtable · saved');
+  } else {
+    // localStorage fallback
+    localStorage.setItem('vox_prec_'+id, JSON.stringify(data));
+    const idx = JSON.parse(localStorage.getItem('vox_prec_index')||'[]');
+    idx.unshift({id});
+    localStorage.setItem('vox_prec_index', JSON.stringify(idx));
+  }
+  await loadPrecedents();
+}
+
+async function deletePrecedent(id, atId){
+  if(isAirtableConfigured() && atId){
+    setSyncStatus('syncing','Deleting...');
+    await atDelete(atId);
+  } else {
+    localStorage.removeItem('vox_prec_'+id);
+    const idx = JSON.parse(localStorage.getItem('vox_prec_index')||'[]').filter(i=>i.id!==id);
+    localStorage.setItem('vox_prec_index', JSON.stringify(idx));
+  }
+  await loadPrecedents();
+}
+
+function genId(){ return Math.random().toString(36).slice(2,10)+Date.now().toString(36); }
+
+// ─── ANTHROPIC API ────────────────────────────────────────────────────────────
+async function callClaude(systemPrompt, userContent){
+  const key = getAnthropicKey();
+  if(!key) throw new Error('Anthropic API key not set. Open ⚙ Settings to add it.');
+  const res = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,system:systemPrompt,messages:[{role:'user',content:userContent}]})
+  });
+  if(!res.ok){ const e=await res.json(); throw new Error(e.error?.message||'API error '+res.status); }
+  const data = await res.json();
+  const raw = data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+  return JSON.parse(raw.replace(/```json|```/g,'').trim());
+}
+
+// ─── FILE READING ─────────────────────────────────────────────────────────────
+function readFile(file){
+  return new Promise(res=>{
+    if(file.type==='application/pdf'){
+      const r=new FileReader();r.onload=e=>res({type:'pdf',data:e.target.result.split(',')[1]});r.readAsDataURL(file);
+    } else {
+      const r=new FileReader();r.onload=e=>res({type:'text',data:e.target.result});r.readAsText(file);
+    }
+  });
+}
+function buildContent(fileData, extraText){
+  if(fileData?.type==='pdf') return [{type:'document',source:{type:'base64',media_type:'application/pdf',data:fileData.data}},{type:'text',text:extraText}];
+  return [{type:'text',text:(fileData?.data||'')+(fileData?.data?'\n\n':'')+extraText}];
+}
+
+// ─── PROMPTS ──────────────────────────────────────────────────────────────────
+const SUMMARIZER_PROMPT = `You are a senior entertainment attorney specializing in animation talent deals. Extract a complete structured summary of material deal terms from this closed animation series contract for storage as a precedent.
+
+Respond with valid JSON only, no markdown:
+{"deal_name":"","talent_name":"","studio":"","network_platform":"","deal_date":"","role":"","deal_type":"series regular/recurring/guest","seasons_covered":"","compensation":{"y1_episodic":null,"y2_episodic":null,"y3_episodic":null,"y4_episodic":null,"min_guarantee_eps":null,"signing_bonus":null,"escalation_pct":null,"escalation_flat":null,"pay_or_play":"yes/no/conditional","completion_bonus_y1":null,"completion_bonus_y2":null,"backend_pct":null,"backend_type":"","merch_royalty_pct":null,"merch_floor_pct":null,"merch_admin_fee_affiliated_pct":null,"soundtrack_royalty_pct":null,"notes":""},"options":{"num_additional_options":null,"auto_exercise":"yes/no/partial","notice_window_business_days":null,"notes":""},"rights":{"work_for_hire":"yes/no","universe_perpetuity":"yes/no","hereafter_created_tech":"yes/no","moral_rights_waiver":"yes/no","post_term_voice_prohibition":"perpetual/limited/none","post_term_prohibition_years":null,"notes":""},"ai_simulation":{"char_simulation_provision":"yes/no","simulation_response_window_days":null,"explicit_ai_carveout":"yes/no/partial","new_dialogue_consent_required":"yes/no","ai_enhancement_permitted":"yes/no","notes":""},"morality_default":{"morality_trigger":"felony_only/felony_misd/felony_conduct/good_cause_undefined","good_cause_defined":"yes/no","mutual_morality":"yes/no","nexus_to_series_required":"yes/no","cure_right":"yes/no","cure_window_hours":null,"cure_limit":"one_time/unlimited/none","assurance_demand_24hr":"yes/no","notes":""},"suspension_termination":{"auto_suspension_no_notice":"yes/no","work_ban_default_suspension":"yes/no","disability_threshold_consecutive_days":null,"disability_threshold_aggregate_days":null,"talent_termination_right":"yes/no","studio_cure_days":null,"cross_agreement_withholding":"yes/no","fm_covers_cast_nonperformance":"yes/no","fm_covers_economic_efficiency":"yes/no","notes":""},"remedies_dispute":{"talent_injunctive_right":"yes/no","talent_remedy_capped":"yes/no","mandatory_arbitration":"yes/no","arbitration_rules":"JAMS/638_Reference/other","deposition_limit_per_side":null,"hearing_days_max":null,"fee_shifting":"yes/no/bad_faith_only/losing_party","arbitration_confidential":"yes/no","notes":""},"exclusivity_scheduling":{"exclusivity_type":"exclusive/first_position/non_exclusive","in_person_mandate":"yes/no","remote_permitted":"yes/no","post_term_exclusivity_weeks":null,"key_talent_condition":"yes/no","preexisting_commitments_named":"yes/no","scheduling_accommodation":"yes/no","notes":""},"likeness_credit":{"likeness_approval_rights":"yes/no","still_photo_approval_pct":null,"nonphoto_approval":"yes/no","licensee_approval_carveout":"yes/no","licensee_name":"","credit_type":"main_titles/end_titles/separate_card","credit_billing":"and_credit/last_position/grouped","audit_right":"yes/no","accounting_period_defined":"yes/no","notes":""},"notable_wins":[],"notable_losses":[],"overall_posture":"studio-favorable/mixed/talent-favorable","outcome":"signed/fell_apart/renegotiated","summary_paragraph":""}`;
+
+function buildAnalyzerPrompt(precs){
+  const has = precs&&precs.length>0;
+  const ctx = has?'\n\nVOX PRECEDENT LIBRARY:\n'+precs.map((p,i)=>`
+PRECEDENT ${i+1}: ${p.deal_name} (${p.talent_name} / ${p.studio} / ${p.deal_date})
+Posture: ${p.overall_posture} | ${p.summary_paragraph||''}
+Comp: Y1 $${p.compensation?.y1_episodic?.toLocaleString()||'N/A'}/ep, Guarantee: ${p.compensation?.min_guarantee_eps||'N/A'} eps, Backend: ${p.compensation?.backend_pct||'N/A'}%, CompletionBonus: ${p.compensation?.completion_bonus_y1||'N/A'}
+AI: char_sim=${p.ai_simulation?.char_simulation_provision}, carveout=${p.ai_simulation?.explicit_ai_carveout}, new_dial_consent=${p.ai_simulation?.new_dialogue_consent_required}
+Morality: trigger=${p.morality_default?.morality_trigger}, mutual=${p.morality_default?.mutual_morality}, cure_hrs=${p.morality_default?.cure_window_hours}
+Exclusivity: ${p.exclusivity_scheduling?.exclusivity_type}, in_person=${p.exclusivity_scheduling?.in_person_mandate}, remote=${p.exclusivity_scheduling?.remote_permitted}
+Remedies: talent_injunctive=${p.remedies_dispute?.talent_injunctive_right}, remedy_cap=${p.remedies_dispute?.talent_remedy_capped}
+Wins: ${(p.notable_wins||[]).join('; ')||'none'} | Losses: ${(p.notable_losses||[]).join('; ')||'none'}`).join('\n\n---')
++'\n\nCompare new deal against these precedents. Note improvements and rollbacks vs. closed deals.':'';
+  return `You are a senior entertainment attorney with 30+ years specializing in animation talent deals. Represent the talent.${ctx}
+
+Evaluate all seven areas: (1) Compensation & Options, (2) Rights & AI, (3) Morality & Default, (4) Suspension & Termination, (5) Remedies & Dispute, (6) Likeness/Merch/Credit, (7) Exclusivity & Scheduling.
+
+Known red flags: char simulation without AI carveout, hereafter-created tech without limit, undefined good cause, misdemeanor morality, auto suspension without notice, 24hr assurance demand, work ban during default suspension, force majeure covering cast non-performance or economic efficiency, merch admin fee >15% for affiliates, no audit right, money-only remedy cap, streamer carve-out gutting likeness approval, in-person mandate without remote option, auto-exercise of options, disability threshold <14 days, cross-agreement withholding, no talent termination right for studio breach.
+
+Respond with valid JSON only:
+{"summary":{"overall_posture":"studio-favorable|mixed|talent-favorable","score":0,"executive_summary":"","sign_recommendation":"approve|conditional|do_not_sign","sign_rationale":"","precedent_comparison":${has?'""':'null'}},"critical_issues":[{"title":"","severity":"critical|review|note","category":"","excerpt":"","analysis":"","precedent_note":${has?'""':'null'},"recommended_fix":""}],"section_analysis":[{"category":"","rating":"favorable|mixed|unfavorable","findings":[],"wins":[],"concerns":[],"precedent_delta":${has?'""':'null'}}],"negotiating_priorities":[{"priority":1,"issue":"","ask":"","leverage":"","precedent_support":${has?'""':'null'}}],"questions_for_opposing_counsel":[],"accepted_as_market":[]}`;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────────────────────────
+function postureConfig(p){return{['studio-favorable']:{color:'var(--red)',cls:'badge-red',label:'STUDIO-FAVORABLE'},mixed:{color:'var(--amber)',cls:'badge-amber',label:'MIXED'},'talent-favorable':{color:'var(--green)',cls:'badge-green',label:'TALENT-FAVORABLE'}}[p]||{color:'var(--amber)',cls:'badge-amber',label:'UNKNOWN'};}
+function sevConfig(s){return{critical:{cls:'badge-red',label:'🔴 CRITICAL',textColor:'var(--red-t)',border:'var(--red)',bg:'var(--red-bg)'},review:{cls:'badge-amber',label:'🟡 REVIEW',textColor:'var(--amber-t)',border:'var(--amber)',bg:'var(--amber-bg)'},note:{cls:'badge-blue',label:'🔵 NOTE',textColor:'var(--blue-t)',border:'var(--blue)',bg:'var(--blue-bg)'}}[s]||{cls:'badge-blue',label:'NOTE',textColor:'var(--blue-t)',border:'var(--blue)',bg:'var(--blue-bg)'};}
+function ratingConfig(r){return{favorable:{color:'var(--green)',bg:'var(--green-bg)',label:'FAVORABLE'},mixed:{color:'var(--amber)',bg:'var(--amber-bg)',label:'MIXED'},unfavorable:{color:'var(--red)',bg:'var(--red-bg)',label:'UNFAVORABLE'}}[r]||{color:'var(--amber)',bg:'var(--amber-bg)',label:'MIXED'};}
+function signConfig(s){return{approve:{color:'var(--green)',label:'APPROVE FOR SIGNATURE'},conditional:{color:'var(--amber)',label:'CONDITIONAL — ISSUES REMAIN'},do_not_sign:{color:'var(--red)',label:'DO NOT SIGN'}}[s]||{color:'var(--amber)',label:'REVIEW REQUIRED'};}
+function e(str){return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function $id(id){return document.getElementById(id);}
+
+// ─── SETTINGS ─────────────────────────────────────────────────────────────────
+function openSettings(){
+  const connected = isAirtableConfigured();
+  $id('modal-content').innerHTML = `
+    <div class="flex justify-between items-center mb-16">
+      <div><div class="section-label">Configuration</div><div style="font-size:18px;font-weight:700">Platform Settings</div></div>
+      <button class="btn btn-sm" onclick="closeModal()">Close ×</button>
+    </div>
+
+    <!-- ANTHROPIC -->
+    <div class="card mb-12">
+      <div class="card-title">Anthropic API Key (AI Analysis Engine)</div>
+      <div class="font-sans text-xs text-muted mb-8">Required for Summarizer and Analyzer. Get yours at <strong>console.anthropic.com</strong></div>
+      <input class="input" type="password" id="s-anthropic" placeholder="sk-ant-..." value="${e(getAnthropicKey())}">
+    </div>
+
+    <!-- AIRTABLE -->
+    <div class="card mb-12">
+      <div class="card-title">Airtable Shared Library</div>
+      <div class="font-sans text-xs text-muted mb-12">Connect Airtable so your whole team shares one precedent library. One-time setup takes about 5 minutes.</div>
+
+      <div style="background:var(--bg3);border-radius:6px;padding:14px;margin-bottom:14px">
+        <div class="font-sans text-xxs text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Setup Instructions</div>
+        <div class="setup-step">
+          <div class="setup-num">1</div>
+          <div class="setup-text">Go to <strong>airtable.com</strong> → sign up free (or log in) → create a new <strong>Base</strong> named <em>VOX Deal Library</em></div>
+        </div>
+        <div class="setup-step">
+          <div class="setup-num">2</div>
+          <div class="setup-text">Inside the base, rename the default table to <code>Precedents</code> and add these fields: <code>deal_id</code> (Single line text), <code>deal_name</code> (Single line text), <code>talent_name</code> (Single line text), <code>studio</code> (Single line text), <code>deal_date</code> (Single line text), <code>overall_posture</code> (Single line text), <code>data</code> (Long text)</div>
+        </div>
+        <div class="setup-step">
+          <div class="setup-num">3</div>
+          <div class="setup-text">Go to <strong>airtable.com/create/tokens</strong> → create a Personal Access Token with <code>data.records:read</code> and <code>data.records:write</code> scopes for your base → paste below</div>
+        </div>
+        <div class="setup-step" style="border:none">
+          <div class="setup-num">4</div>
+          <div class="setup-text">Find your Base ID: open your base → click <strong>Help → API docs</strong> → the ID starting with <code>app...</code> appears in the URL. Paste below.</div>
+        </div>
+      </div>
+
+      <div class="grid-2 mb-10">
+        <div>
+          <label class="label">Personal Access Token</label>
+          <input class="input" type="password" id="s-at-token" placeholder="pat..." value="${e(getAirtableToken())}">
+        </div>
+        <div>
+          <label class="label">Base ID</label>
+          <input class="input" id="s-at-base" placeholder="appXXXXXXXXXXXXXX" value="${e(getAirtableBaseId())}">
+        </div>
+      </div>
+      <div class="mb-10">
+        <label class="label">Table Name</label>
+        <input class="input" id="s-at-table" placeholder="Precedents" value="${e(getAirtableTable())}">
+      </div>
+      <div class="flex gap-8 items-center">
+        <button class="btn btn-sm" onclick="testAirtable()">Test Connection</button>
+        <span id="at-test-result" class="font-sans text-xs text-muted"></span>
+      </div>
+    </div>
+
+    <div class="flex gap-10">
+      <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      <button class="btn" onclick="closeModal()">Cancel</button>
+    </div>
+  `;
+  $id('modal').classList.remove('hidden');
+}
+
+async function testAirtable(){
+  const token = $id('s-at-token').value.trim();
+  const baseId = $id('s-at-base').value.trim();
+  const table = $id('s-at-table').value.trim()||'Precedents';
+  const el = $id('at-test-result');
+  if(!token||!baseId){el.textContent='Enter token and base ID first.';el.style.color='var(--red-t)';return;}
+  el.textContent='Testing...';el.style.color='var(--text3)';
+  try{
+    const res = await fetch(`https://api.airtable.com/v0/${baseId}/${encodeURIComponent(table)}?maxRecords=1`,{headers:{'Authorization':'Bearer '+token}});
+    if(res.ok){el.textContent='✓ Connected successfully';el.style.color='var(--green-t)';}
+    else{const e=await res.json();el.textContent='✗ '+( e.error?.message||'Connection failed');el.style.color='var(--red-t)';}
+  } catch(err){el.textContent='✗ Network error: '+err.message;el.style.color='var(--red-t)';}
+}
+
+async function saveSettings(){
+  setCfg('anthropic_key',$id('s-anthropic').value.trim());
+  setCfg('airtable_token',$id('s-at-token').value.trim());
+  setCfg('airtable_base_id',$id('s-at-base').value.trim());
+  setCfg('airtable_table',$id('s-at-table').value.trim()||'Precedents');
+  closeModal();
+  await loadPrecedents();
+  if(currentTab==='library') renderLibrary();
+  updateLibCount();
+}
+
+function closeModal(){$id('modal').classList.add('hidden');}
+
+// ─── TAB SWITCHING ────────────────────────────────────────────────────────────
+function switchTab(tab){
+  currentTab=tab;
+  ['library','summarizer','analyzer'].forEach(t=>{
+    $id('tab-'+t).classList.toggle('active',t===tab);
+    $id('tab-'+t+'-content').classList.toggle('hidden',t!==tab);
+  });
+  if(tab==='library')renderLibrary();
+  if(tab==='summarizer')renderSummarizer();
+  if(tab==='analyzer')renderAnalyzer();
+  updateLibCount();
+}
+function updateLibCount(){$id('lib-count').textContent=precedents.length;}
+
+// ─── DROP ZONE ────────────────────────────────────────────────────────────────
+function setupDrop(zoneId,onFile){
+  const zone=$id(zoneId);if(!zone)return;
+  zone.addEventListener('click',()=>{const i=document.createElement('input');i.type='file';i.accept='.pdf,.txt,.docx';i.onchange=async e=>{if(e.target.files[0])onFile(e.target.files[0]);};i.click();});
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',async e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])onFile(e.dataTransfer.files[0]);});
+}
+
+// ─── LIBRARY ─────────────────────────────────────────────────────────────────
+function renderLibrary(){
+  const el=$id('tab-library-content');
+  const modeHtml = isAirtableConfigured()
+    ? `<span class="mode-badge" style="background:var(--green-bg);color:var(--green-t);border:1px solid var(--green)33"><span style="width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block"></span> Airtable · Shared</span>`
+    : `<span class="mode-badge" style="background:var(--bg4);color:var(--text3);border:1px solid var(--border2)">Local · Not shared</span>`;
+  if(!precedents.length){
+    el.innerHTML=`<div class="flex justify-between items-center mb-20">
+      <div><div class="section-label">Precedent Library</div><div class="page-title" style="margin:0">0 deals on file</div></div>
+      <div class="flex items-center gap-10">${modeHtml}<button class="btn btn-sm" onclick="loadPrecedents().then(()=>renderLibrary())">↻ Sync</button></div>
+    </div>
+    <div class="empty"><div class="icon">📁</div><div class="title">No precedents yet</div><div class="sub">${isAirtableConfigured()?'Airtable connected. Use the Summarizer to add your first deal.':'Use the Summarizer tab to process closed deals. Connect Airtable in ⚙ Settings to share with your team.'}</div></div>`;
+    return;
+  }
+  const cards=precedents.map((p,i)=>{
+    const pc=postureConfig(p.overall_posture);
+    return `<div class="prec-card">
+      <div class="flex justify-between items-center mb-8" style="gap:10px">
+        <div style="flex:1;min-width:0"><div class="font-bold" style="font-size:14px;margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(p.deal_name||'Untitled')}</div>
+        <div class="font-sans text-xs text-muted">${[p.talent_name,p.studio,p.deal_date].filter(Boolean).map(e).join(' · ')}</div></div>
+        <span class="badge ${pc.cls}">${pc.label}</span>
+      </div>
+      ${p.summary_paragraph?`<div class="text-sm italic lh-16" style="color:var(--text3);margin-bottom:10px">${e(p.summary_paragraph)}</div>`:''}
+      <div class="flex flex-wrap gap-16 mb-12">
+        ${p.compensation?.y1_episodic?`<div><div class="stat-label">Y1 Rate</div><div class="stat-val">$${Number(p.compensation.y1_episodic).toLocaleString()}</div></div>`:''}
+        ${p.compensation?.min_guarantee_eps?`<div><div class="stat-label">Guarantee</div><div class="stat-val">${p.compensation.min_guarantee_eps} eps</div></div>`:''}
+        ${p.options?.num_additional_options!=null?`<div><div class="stat-label">Options</div><div class="stat-val">${p.options.num_additional_options}</div></div>`:''}
+        ${p.ai_simulation?.explicit_ai_carveout?`<div><div class="stat-label">AI Carveout</div><div class="stat-val" style="color:${p.ai_simulation.explicit_ai_carveout==='yes'?'var(--green)':'var(--red)'}">${p.ai_simulation.explicit_ai_carveout}</div></div>`:''}
+        ${p.morality_default?.mutual_morality?`<div><div class="stat-label">Mutual Morality</div><div class="stat-val" style="color:${p.morality_default.mutual_morality==='yes'?'var(--green)':'var(--red)'}">${p.morality_default.mutual_morality}</div></div>`:''}
+      </div>
+      <div class="flex gap-8">
+        <button class="btn btn-sm" onclick="viewPrecedent(${i})">View Details</button>
+        <button class="btn btn-sm btn-danger" onclick="confirmDelete('${p.id}','${p._atId||''}')">Delete</button>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML=`<div class="flex justify-between items-center mb-20">
+    <div><div class="section-label">Precedent Library</div><div class="page-title" style="margin:0">${precedents.length} deal${precedents.length!==1?'s':''} on file</div></div>
+    <div class="flex items-center gap-10">${modeHtml}<button class="btn btn-sm" onclick="loadPrecedents().then(()=>{renderLibrary();updateLibCount();})">↻ Sync</button></div>
+  </div><div class="grid-2">${cards}</div>`;
+}
+
+function viewPrecedent(i){
+  const p=precedents[i];const pc=postureConfig(p.overall_posture);
+  const sections=[['Compensation',p.compensation],['Options',p.options],['Rights',p.rights],['AI & Simulation',p.ai_simulation],['Morality & Default',p.morality_default],['Suspension & Termination',p.suspension_termination],['Remedies & Dispute',p.remedies_dispute],['Exclusivity & Scheduling',p.exclusivity_scheduling],['Likeness & Credit',p.likeness_credit]];
+  const wH=p.notable_wins?.length?`<div style="padding:12px;background:var(--green-bg);border:1px solid var(--green)33;border-radius:5px">${p.notable_wins.map(w=>`<div class="text-sm mb-4" style="color:var(--green-t)">✓ ${e(w)}</div>`).join('')}</div>`:'';
+  const lH=p.notable_losses?.length?`<div style="padding:12px;background:var(--red-bg);border:1px solid var(--red)33;border-radius:5px">${p.notable_losses.map(l=>`<div class="text-sm mb-4" style="color:var(--red-t)">✗ ${e(l)}</div>`).join('')}</div>`:'';
+  const sH=sections.map(([title,data])=>!data?'':`<div class="mb-12"><div class="section-label mb-8">${title}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:5px">${Object.entries(data).filter(([k,v])=>v!==null&&v!==''&&k!=='notes').map(([k,v])=>`<div class="stat-box"><div class="stat-label">${k.replace(/_/g,' ')}</div><div class="font-bold text-sm text-gold">${e(String(v))}</div></div>`).join('')}</div>${data.notes?`<div class="text-xs italic text-muted mt-8">${e(data.notes)}</div>`:''}</div>`).join('');
+  $id('modal-content').innerHTML=`<div class="flex justify-between items-start mb-16"><div><div class="section-label">Precedent Detail</div><div style="font-size:19px;font-weight:700">${e(p.deal_name)}</div><div class="font-sans text-xs text-muted">${[p.talent_name,p.studio,p.network_platform,p.deal_date].filter(Boolean).map(e).join(' · ')}</div></div><div class="flex gap-8 items-center"><span class="badge ${pc.cls}">${pc.label}</span><button class="btn btn-sm" onclick="closeModal()">Close ×</button></div></div>${p.summary_paragraph?`<div class="callout mb-16">${e(p.summary_paragraph)}</div>`:''} ${(wH||lH)?`<div class="grid-2 mb-16">${wH}${lH}</div>`:''}${sH}`;
+  $id('modal').classList.remove('hidden');
+}
+
+async function confirmDelete(id,atId){
+  if(!confirm('Delete this precedent?'))return;
+  try{ await deletePrecedent(id,atId); renderLibrary(); updateLibCount(); }
+  catch(err){ alert('Delete failed: '+err.message); }
+}
+
+// ─── SUMMARIZER ───────────────────────────────────────────────────────────────
+function renderSummarizer(){
+  const el=$id('tab-summarizer-content');
+  if(sumState.step==='processing'){el.innerHTML=`<div class="section-label">Precedent Summarizer</div><div class="page-title" style="margin-bottom:0">Process a Closed Deal</div><div class="spinner"><div class="icon">⚖️</div><div style="font-size:15px;font-weight:700">Extracting deal terms...</div><div class="font-sans text-sm" style="color:var(--gold)">Analyzing compensation, rights, AI language, morality...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;return;}
+  if(sumState.step==='saving'){el.innerHTML=`<div class="spinner"><div class="icon">💾</div><div style="font-size:15px;font-weight:700">Saving to ${isAirtableConfigured()?'Airtable':'library'}...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;return;}
+  if(sumState.step==='saved'){el.innerHTML=`<div class="empty"><div class="icon">✅</div><div class="title">Saved to ${isAirtableConfigured()?'Airtable Library':'Local Library'}</div><div class="sub">${e(sumState.result?.deal_name||'Deal')} has been added — ${isAirtableConfigured()?'visible to your entire team immediately':'local only; connect Airtable in ⚙ Settings to share'}</div><div style="margin-top:24px;display:flex;gap:10px;justify-content:center"><button class="btn btn-primary" onclick="sumState={step:'input',fileData:null,fileName:'',paste:'',dealName:'',talentName:'',studio:'',date:'',context:'',result:null,notes:''};renderSummarizer()">Summarize Another Deal</button><button class="btn" onclick="switchTab('library')">View Library →</button></div></div>`;return;}
+  if(sumState.step==='review'&&sumState.result){renderSummarizerReview(el);return;}
+  el.innerHTML=`<div class="section-label">Precedent Summarizer</div><div class="page-title">Process a Closed Deal</div>
+    <div class="grid-4 mb-12">
+      <div><label class="label">Series Title</label><input class="input" placeholder="e.g. Invincible" value="${e(sumState.dealName)}" oninput="sumState.dealName=this.value"></div>
+      <div><label class="label">Talent Name</label><input class="input" placeholder="e.g. J.K. Simmons" value="${e(sumState.talentName)}" oninput="sumState.talentName=this.value"></div>
+      <div><label class="label">Studio</label><input class="input" placeholder="e.g. Amazon Studios" value="${e(sumState.studio)}" oninput="sumState.studio=this.value"></div>
+      <div><label class="label">Deal Year</label><input class="input" placeholder="e.g. 2024" value="${e(sumState.date)}" oninput="sumState.date=this.value"></div>
+    </div>
+    <div class="mb-12"><label class="label">Context (optional)</label><input class="input" placeholder="e.g. Seasons 4-5, included MAGR backend, fell apart at option exercise..." value="${e(sumState.context)}" oninput="sumState.context=this.value"></div>
+    <div id="sum-drop" class="drop-zone mb-8"><div class="dz-icon">📄</div><div class="dz-main">${sumState.fileName||'Drop PDF or text file here'}</div><div class="dz-sub">Click to browse · PDF, TXT</div></div>
+    <div class="or-divider">— or paste text below —</div>
+    <textarea class="textarea mb-12" placeholder="Paste deal memo, term sheet, or contract text here..." oninput="sumState.paste=this.value;sumState.fileData=null;sumState.fileName='';document.querySelector('#sum-drop .dz-main').textContent='Drop PDF or text file here'">${e(sumState.paste)}</textarea>
+    <div id="sum-error" class="error-box hidden"></div>
+    <button class="btn btn-primary" onclick="runSummarizer()">Extract Deal Summary →</button>`;
+  setupDrop('sum-drop',async f=>{sumState.fileData=await readFile(f);sumState.fileName=f.name;sumState.paste='';document.querySelector('#sum-drop .dz-main').textContent=f.name;});
+}
+
+function renderSummarizerReview(el){
+  const r=sumState.result;const pc=postureConfig(r.overall_posture);
+  const fields=[['Y1 Rate',r.compensation?.y1_episodic?'$'+Number(r.compensation.y1_episodic).toLocaleString():'—'],['Y2 Rate',r.compensation?.y2_episodic?'$'+Number(r.compensation.y2_episodic).toLocaleString():'—'],['Guarantee',r.compensation?.min_guarantee_eps?r.compensation.min_guarantee_eps+' eps':'—'],['Options',r.options?.num_additional_options??'—'],['Backend',r.compensation?.backend_pct?r.compensation.backend_pct+'%':'—'],['Comp. Bonus',r.compensation?.completion_bonus_y1?'$'+Number(r.compensation.completion_bonus_y1).toLocaleString():'—'],['Exclusivity',r.exclusivity_scheduling?.exclusivity_type||'—'],['AI Carveout',r.ai_simulation?.explicit_ai_carveout||'—'],['New Dial. Consent',r.ai_simulation?.new_dialogue_consent_required||'—'],['Morality',(r.morality_default?.morality_trigger||'—').replace(/_/g,' ')],['Mutual Morality',r.morality_default?.mutual_morality||'—'],['Audit Right',r.likeness_credit?.audit_right||'—'],['In-Person',r.exclusivity_scheduling?.in_person_mandate||'—'],['Remedy Cap',r.remedies_dispute?.talent_remedy_capped||'—'],['Talent Injunction',r.remedies_dispute?.talent_injunctive_right||'—'],['Dispute',r.remedies_dispute?.arbitration_rules||'—']];
+  el.innerHTML=`<div class="flex justify-between items-center mb-16"><div><div class="section-label">Review Extracted Summary</div><div style="font-size:18px;font-weight:700">${e(r.deal_name||'Untitled')}</div></div><span class="badge ${pc.cls}">${pc.label}</span></div>
+    ${r.summary_paragraph?`<div class="card border-left-gold mb-12"><div class="card-title">Summary</div><div class="text-sm lh-17" style="color:var(--text2)">${e(r.summary_paragraph)}</div></div>`:''}
+    ${(r.notable_wins?.length||r.notable_losses?.length)?`<div class="grid-2 mb-12">${r.notable_wins?.length?`<div class="card"><div class="card-title">Notable Wins</div>${r.notable_wins.map(w=>`<div class="text-sm mb-4" style="color:var(--green-t)">✓ ${e(w)}</div>`).join('')}</div>`:''} ${r.notable_losses?.length?`<div class="card"><div class="card-title">Notable Losses</div>${r.notable_losses.map(l=>`<div class="text-sm mb-4" style="color:var(--red-t)">✗ ${e(l)}</div>`).join('')}</div>`:''}</div>`:''}
+    <div class="card mb-12"><div class="card-title">Key Deal Terms</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">${fields.map(([k,v])=>`<div class="stat-box"><div class="stat-label">${k}</div><div class="font-bold text-sm text-gold">${e(String(v))}</div></div>`).join('')}</div></div>
+    <div class="card mb-12"><div class="card-title">Attorney Notes (optional — saved with precedent)</div><textarea class="textarea" style="min-height:80px" placeholder="Negotiating context, outcome, relationship notes..." oninput="sumState.notes=this.value">${e(sumState.notes)}</textarea></div>
+    <div class="flex gap-10 items-center">
+      <button class="btn btn-primary" onclick="saveSummary()">Save to ${isAirtableConfigured()?'Shared Airtable Library':'Local Library'} →</button>
+      <button class="btn" onclick="sumState.step='input';renderSummarizer()">← Start Over</button>
+      ${isAirtableConfigured()?'':`<span class="font-sans text-xs text-muted">Tip: Connect Airtable in ⚙ Settings to share with your team</span>`}
+    </div>`;
+}
+
+async function runSummarizer(){
+  if(!sumState.fileData&&!sumState.paste.trim()){showSumError('Please upload a file or paste contract text.');return;}
+  sumState.step='processing';renderSummarizer();
+  try{
+    const ctx=[sumState.dealName&&`Series: ${sumState.dealName}`,sumState.talentName&&`Talent: ${sumState.talentName}`,sumState.studio&&`Studio: ${sumState.studio}`,sumState.date&&`Date: ${sumState.date}`,sumState.context].filter(Boolean).join('. ');
+    const extra=`Extract a complete structured summary of this closed animation deal.${ctx?' '+ctx+'.':''} Respond with JSON only.`;
+    const content=sumState.fileData?buildContent(sumState.fileData,extra):[{type:'text',text:sumState.paste+'\n\n'+extra}];
+    const res=await callClaude(SUMMARIZER_PROMPT,content);
+    if(sumState.dealName)res.deal_name=sumState.dealName;
+    if(sumState.talentName)res.talent_name=sumState.talentName;
+    if(sumState.studio)res.studio=sumState.studio;
+    if(sumState.date)res.deal_date=sumState.date;
+    sumState.result=res;sumState.notes=res.attorney_notes||'';sumState.step='review';
+  } catch(err){sumState.step='input';renderSummarizer();showSumError('Extraction failed: '+err.message);return;}
+  renderSummarizer();
+}
+
+async function saveSummary(){
+  if(!sumState.result)return;
+  sumState.step='saving';renderSummarizer();
+  try{
+    const id=genId();
+    const toSave={...sumState.result,id,attorney_notes:sumState.notes,saved_at:new Date().toISOString()};
+    await savePrecedent(toSave);
+    sumState.step='saved';
+  } catch(err){sumState.step='review';renderSummarizer();showSumError('Save failed: '+err.message);return;}
+  renderSummarizer();
+  updateLibCount();
+}
+function showSumError(msg){const el=$id('sum-error');if(el){el.textContent=msg;el.classList.remove('hidden');}}
+
+// ─── ANALYZER ─────────────────────────────────────────────────────────────────
+function renderAnalyzer(){
+  const el=$id('tab-analyzer-content');
+  if(anaState.step==='analyzing'){el.innerHTML=`<div class="section-label">Deal Analyzer</div><div class="page-title" style="margin-bottom:0">Analyze New Agreement</div><div class="spinner"><div class="icon">⚖️</div><div style="font-size:15px;font-weight:700">Analyzing agreement${anaState.selectedPrecs.length?' against '+anaState.selectedPrecs.length+' precedent(s)':''}...</div><div class="font-sans text-sm" style="color:var(--gold)">Reviewing all seven deal areas...</div><div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div></div>`;return;}
+  if(anaState.step==='results'&&anaState.result){renderAnalyzerResults(el);return;}
+  const precChecks=precedents.map(p=>`<div class="prec-check-item${anaState.selectedPrecs.includes(p.id)?' checked':''}" onclick="togglePrec('${p.id}')"><div class="check-box">${anaState.selectedPrecs.includes(p.id)?'✓':''}</div><div style="flex:1;min-width:0"><div class="font-bold text-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e(p.deal_name)}</div><div class="font-sans text-xxs text-muted">${[p.talent_name,p.deal_date].filter(Boolean).map(e).join(' · ')}</div></div><span class="badge ${postureConfig(p.overall_posture).cls}" style="font-size:8px;padding:1px 6px">${postureConfig(p.overall_posture).label.split('-')[0]}</span></div>`).join('');
+  el.innerHTML=`<div class="section-label">Deal Analyzer</div><div class="page-title">Analyze New Agreement</div>
+    <div class="grid-3 mb-12">
+      <div><label class="label">Series Title</label><input class="input" placeholder="e.g. Archer" value="${e(anaState.dealName)}" oninput="anaState.dealName=this.value"></div>
+      <div><label class="label">Talent Name</label><input class="input" placeholder="e.g. Amber Nash" value="${e(anaState.talentName)}" oninput="anaState.talentName=this.value"></div>
+      <div><label class="label">Context</label><input class="input" placeholder="e.g. Studio first draft, option year..." value="${e(anaState.context)}" oninput="anaState.context=this.value"></div>
+    </div>
+    <div class="grid-2 mb-12">
+      <div>
+        <div id="ana-drop" class="drop-zone mb-8"><div class="dz-icon">📄</div><div class="dz-main">${anaState.fileName||'Drop contract to analyze (PDF or text)'}</div><div class="dz-sub">Click to browse · PDF, TXT</div></div>
+        <textarea class="textarea" style="min-height:140px" placeholder="Or paste contract text / sections here..." oninput="anaState.paste=this.value;anaState.fileData=null;anaState.fileName='';document.querySelector('#ana-drop .dz-main').textContent='Drop contract to analyze (PDF or text)'">${e(anaState.paste)}</textarea>
+      </div>
+      <div class="card" style="margin-bottom:0">
+        <div class="card-title">Precedent Context (${anaState.selectedPrecs.length} selected)</div>
+        ${!precedents.length?`<div class="font-sans text-sm text-muted" style="padding:12px 0">${isAirtableConfigured()?'Library is empty. Use Summarizer to add deals.':'No precedents yet. Use Summarizer to add closed deals, or connect Airtable in ⚙ Settings to access team library.'}</div>`:`<div class="font-sans text-xs text-muted mb-8">Select deals to compare against:</div><div class="flex gap-8 mb-10"><button class="btn btn-ghost btn-sm" onclick="anaState.selectedPrecs=precedents.map(p=>p.id);renderAnalyzer()">Select All</button><button class="btn btn-ghost btn-sm" onclick="anaState.selectedPrecs=[];renderAnalyzer()">Clear</button></div><div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:5px">${precChecks}</div>`}
+      </div>
+    </div>
+    <div id="ana-error" class="error-box hidden"></div>
+    <div class="flex items-center gap-12">
+      <button class="btn btn-primary" onclick="runAnalyzer()">${anaState.selectedPrecs.length?`Analyze with ${anaState.selectedPrecs.length} Precedent${anaState.selectedPrecs.length!==1?'s':''} →`:'Analyze Agreement →'}</button>
+      ${!anaState.selectedPrecs.length&&precedents.length?`<div class="font-sans text-xs text-muted">⚠ No precedents selected — general standards only</div>`:''}
+    </div>`;
+  setupDrop('ana-drop',async f=>{anaState.fileData=await readFile(f);anaState.fileName=f.name;anaState.paste='';document.querySelector('#ana-drop .dz-main').textContent=f.name;});
+}
+
+function togglePrec(id){if(anaState.selectedPrecs.includes(id))anaState.selectedPrecs=anaState.selectedPrecs.filter(x=>x!==id);else anaState.selectedPrecs.push(id);renderAnalyzer();}
+
+async function runAnalyzer(){
+  if(!anaState.fileData&&!anaState.paste.trim()){showAnaError('Please upload or paste a contract.');return;}
+  anaState.step='analyzing';renderAnalyzer();
+  try{
+    const selPrecs=precedents.filter(p=>anaState.selectedPrecs.includes(p.id));
+    const sysPrompt=buildAnalyzerPrompt(selPrecs.length?selPrecs:null);
+    const ctx=[anaState.talentName&&`Talent: ${anaState.talentName}`,anaState.dealName&&`Series: ${anaState.dealName}`,anaState.context].filter(Boolean).join('. ');
+    const extra=`Analyze this animation talent agreement from the talent side.${ctx?' '+ctx+'.':''} Respond with JSON only.`;
+    const content=anaState.fileData?buildContent(anaState.fileData,extra):[{type:'text',text:anaState.paste+'\n\n'+extra}];
+    const res=await callClaude(sysPrompt,content);
+    anaState.result=res;anaState.openIssue=-1;anaState.openCat=-1;anaState.step='results';
+  } catch(err){anaState.step='input';renderAnalyzer();showAnaError('Analysis failed: '+err.message);return;}
+  renderAnalyzer();
+}
+function showAnaError(msg){const el=$id('ana-error');if(el){el.textContent=msg;el.classList.remove('hidden');}}
+
+function renderAnalyzerResults(el){
+  const r=anaState.result;
+  const{summary,critical_issues=[],section_analysis=[],negotiating_priorities=[],questions_for_opposing_counsel=[],accepted_as_market=[]}=r;
+  const pc=postureConfig(summary?.overall_posture);
+  const sc=signConfig(summary?.sign_recommendation);
+  const score=summary?.score||0;
+  const scoreColor=score>=75?'var(--green)':score>=50?'var(--amber)':'var(--red)';
+  const crits=critical_issues.filter(i=>i.severity==='critical');
+  const revs=critical_issues.filter(i=>i.severity==='review');
+  const notesI=critical_issues.filter(i=>i.severity==='note');
+  const selCount=anaState.selectedPrecs.length;
+
+  const issuesHtml=critical_issues.map((issue,i)=>{
+    const cfg=sevConfig(issue.severity);const isOpen=anaState.openIssue===i;
+    return `<div class="issue-item" style="border-color:${cfg.border}44">
+      <div class="issue-header" style="background:${cfg.bg}" onclick="anaState.openIssue=${isOpen?-1:i};renderAnalyzer()">
+        <span class="badge ${cfg.cls}">${cfg.label}</span>
+        <div style="flex:1"><div class="font-bold font-sans" style="font-size:12px;color:${cfg.textColor}">${e(issue.title)}</div><div class="font-sans text-xxs text-muted">${e(issue.category)}</div></div>
+        <span class="text-muted font-sans" style="font-size:12px">${isOpen?'▲':'▼'}</span>
+      </div>
+      ${isOpen?`<div class="issue-body" style="background:var(--bg3)">
+        ${issue.excerpt?`<div class="issue-excerpt">"${e(issue.excerpt)}"</div>`:''}
+        ${issue.precedent_note?`<div style="padding:7px 11px;border:1px solid var(--gold)33;background:rgba(139,115,85,.08);border-radius:4px;margin-bottom:9px;font-size:11px;font-family:Arial,sans-serif;color:var(--gold-l)">📚 ${e(issue.precedent_note)}</div>`:''}
+        <div class="issue-analysis">${e(issue.analysis)}</div>
+        ${issue.recommended_fix?`<div class="fix-box" style="border-color:var(--green)33;background:var(--green-bg)"><div class="fix-label" style="color:var(--green)">Recommended Fix</div><div class="fix-text" style="color:var(--green-t)">${e(issue.recommended_fix)}</div></div>`:''}
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  const sectHtml=section_analysis.map((sec,i)=>{
+    const rc=ratingConfig(sec.rating);const isOpen=anaState.openCat===i;
+    return `<div class="section-item" style="border-color:${rc.color}33">
+      <div class="section-header" style="background:${rc.bg}" onclick="anaState.openCat=${isOpen?-1:i};renderAnalyzer()">
+        <div><div class="font-bold font-sans" style="font-size:12px;color:${rc.color}">${e(sec.category)}</div>${sec.precedent_delta?`<div class="text-xxs text-muted font-sans">vs. precedents: ${e(sec.precedent_delta)}</div>`:''}</div>
+        <div class="flex items-center gap-8"><span class="font-bold font-sans" style="font-size:9px;letter-spacing:1px;color:${rc.color}">${rc.label}</span><span class="text-muted font-sans" style="font-size:11px">${isOpen?'▲':'▼'}</span></div>
+      </div>
+      ${isOpen?`<div class="section-body" style="background:var(--bg3)">
+        ${(sec.wins||[]).map(w=>`<div class="text-sm font-sans mb-4" style="color:var(--green-t)">✓ ${e(w)}</div>`).join('')}
+        ${(sec.concerns||[]).map(c=>`<div class="text-sm font-sans mb-4" style="color:var(--red-t)">✗ ${e(c)}</div>`).join('')}
+        ${(sec.findings||[]).map(f=>`<div class="text-sm font-sans mb-4 text-muted">• ${e(f)}</div>`).join('')}
+      </div>`:''}
+    </div>`;
+  }).join('');
+
+  const priHtml=negotiating_priorities.map(p=>`<div class="flex gap-12" style="padding:11px 0;border-bottom:1px solid var(--border)">
+    <div class="priority-num">${p.priority}</div>
+    <div style="flex:1">
+      <div class="font-bold font-sans text-gold mb-4" style="font-size:13px">${e(p.issue)}</div>
+      <div class="text-sm font-sans mb-4" style="line-height:1.5"><strong>Ask:</strong> ${e(p.ask)}</div>
+      ${p.leverage?`<div class="text-xs text-muted font-sans" style="line-height:1.4"><em>Leverage:</em> ${e(p.leverage)}</div>`:''}
+      ${p.precedent_support?`<div class="text-xs font-sans mt-4" style="color:var(--gold-l)">📚 ${e(p.precedent_support)}</div>`:''}
+    </div>
+  </div>`).join('');
+
+  el.innerHTML=`
+    <div class="flex justify-between items-center mb-16">
+      <div>
+        <div class="section-label">Analysis Complete</div>
+        <div style="font-size:18px;font-weight:700">${e(anaState.dealName||'Agreement Analysis')}${anaState.talentName?' — '+e(anaState.talentName):''}</div>
+        ${selCount?`<div class="font-sans text-xxs text-muted mt-4">Compared against ${selCount} precedent${selCount!==1?'s':''}</div>`:''}
+      </div>
+      <button class="btn btn-sm" onclick="anaState.step='input';anaState.result=null;renderAnalyzer()">← New Analysis</button>
+    </div>
+    <div class="grid-3 mb-14">
+      <div class="card flex items-center gap-16" style="margin:0">
+        <div class="score-circle" style="border-color:${scoreColor};background:${scoreColor}18">
+          <div class="score-num" style="color:${scoreColor}">${score}</div>
+          <div class="score-denom" style="color:${scoreColor}">/100</div>
+        </div>
+        <div><div class="font-sans text-xxs text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:3px">Deal Score</div><div class="font-bold font-sans" style="font-size:13px;color:${pc.color}">${pc.label}</div></div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="font-sans text-xxs text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Recommendation</div>
+        <div class="font-bold font-sans" style="font-size:12px;color:${sc.color};margin-bottom:5px">${sc.label}</div>
+        <div class="font-sans text-xs" style="color:var(--text2);line-height:1.4">${e(summary?.sign_rationale||'')}</div>
+      </div>
+      <div class="card" style="margin:0">
+        <div class="font-sans text-xxs text-muted" style="letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Issue Count</div>
+        <div class="flex gap-16">${[['🔴',crits.length,'Critical'],['🟡',revs.length,'Review'],['🔵',notesI.length,'Note']].map(([icon,count,lbl])=>`<div><div class="font-bold" style="font-size:18px">${icon} ${count}</div><div class="font-sans text-xxs text-muted">${lbl}</div></div>`).join('')}</div>
+      </div>
+    </div>
+    <div class="card border-left-gold mb-12">
+      <div class="card-title">Executive Summary</div>
+      <div class="text-sm lh-17" style="color:var(--text2)">${e(summary?.executive_summary||'')}</div>
+      ${summary?.precedent_comparison?`<div class="callout mt-12">📚 ${e(summary.precedent_comparison)}</div>`:''}
+    </div>
+    ${critical_issues.length?`<div class="card mb-12"><div class="card-title">Flagged Issues (${critical_issues.length})</div>${issuesHtml}</div>`:''}
+    ${section_analysis.length?`<div class="card mb-12"><div class="card-title">Section Analysis</div><div class="grid-2" style="gap:8px">${sectHtml}</div></div>`:''}
+    ${negotiating_priorities.length?`<div class="card mb-12"><div class="card-title">Negotiating Priorities</div>${priHtml}</div>`:''}
+    ${(questions_for_opposing_counsel.length||accepted_as_market.length)?`<div class="grid-2 mb-12">
+      ${questions_for_opposing_counsel.length?`<div class="card"><div class="card-title">Questions for Opposing Counsel</div>${questions_for_opposing_counsel.map(q=>`<div class="text-sm font-sans mb-8 lh-16" style="padding-left:10px;border-left:2px solid var(--gold);color:var(--text2)">${e(q)}</div>`).join('')}</div>`:''}
+      ${accepted_as_market.length?`<div class="card"><div class="card-title">Accepted as Market Standard</div>${accepted_as_market.map(item=>`<div class="text-sm font-sans mb-6 lh-16" style="padding-left:10px;border-left:2px solid var(--border2);color:var(--text3)">✓ ${e(item)}</div>`).join('')}</div>`:''}
+    </div>`:''}
+    <div style="text-align:center;margin-top:8px"><button class="btn btn-primary" onclick="anaState.step='input';anaState.result=null;renderAnalyzer()">Analyze Another Agreement →</button></div>`;
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+(async function init(){
+  await loadPrecedents();
+  renderLibrary();
+  updateLibCount();
+  // Prompt for settings on first run
+  if(!getAnthropicKey()&&!getAirtableToken()){
+    setTimeout(openSettings, 400);
+  }
+})();
+</script>
+</body>
+</html>
